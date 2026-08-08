@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { adminDb, adminError } from "@/lib/firebase/admin";
 import { z } from "zod";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key_for_build");
@@ -41,19 +40,22 @@ function checkRateLimit(ip: string): boolean {
 // Validation Schema
 // ----------------------------------------------------------------------
 const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().min(10, "Phone number is too short").max(20),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
-  service: z.string().min(2, "Please select a valid service").max(100),
-  message: z.string().max(1000, "Message is too long").optional(),
+  service: z.string().min(2, "Please select a service"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
+// ----------------------------------------------------------------------
+// POST Handler
+// ----------------------------------------------------------------------
 export async function POST(req: Request) {
   try {
     // 1. Rate Limiting Check
     const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
     const isAllowed = checkRateLimit(ip);
-    
+
     if (!isAllowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
@@ -61,23 +63,26 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Parse Payload
+    // 2. Parse Request Body
     let data;
     try {
       data = await req.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid JSON payload." },
+        { status: 400 }
+      );
     }
 
-    // 3. Zod Validation
+    // 3. Validate Data
     const validatedResult = contactSchema.safeParse(data);
-    
+
     if (!validatedResult.success) {
+      const errorMessage = validatedResult.error.errors
+        .map((err) => err.message)
+        .join(", ");
       return NextResponse.json(
-        { 
-          error: "Validation failed.", 
-          details: validatedResult.error.format() 
-        }, 
+        { error: errorMessage },
         { status: 400 }
       );
     }
@@ -87,13 +92,13 @@ export async function POST(req: Request) {
     // 4. Save Lead to Firebase Firestore
     try {
       if (!adminDb) {
-        console.error("Firebase admin is not initialized. Cannot save lead.");
+        console.error("Firebase admin is not initialized. Error:", adminError);
         return NextResponse.json(
-          { error: "Database not configured properly." },
+          { error: `Database not configured properly. Detail: ${adminError || "Unknown"}` },
           { status: 500 }
         );
       }
-      
+
       await adminDb.collection("leads").add({
         name,
         phone,
@@ -101,12 +106,13 @@ export async function POST(req: Request) {
         service,
         message,
         status: "new",
-        createdAt: FieldValue.serverTimestamp(),
+        source: "contact_form",
+        createdAt: new Date(),
       });
-    } catch (firebaseError) {
-      console.error("Firebase insertion error:", firebaseError);
+    } catch (firebaseError: any) {
+      console.error("Error saving lead to Firebase:", firebaseError);
       return NextResponse.json(
-        { error: "Failed to save lead to database." },
+        { error: "Failed to save lead. Please try again later.", detail: firebaseError.message },
         { status: 500 }
       );
     }
@@ -117,18 +123,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, savedToDb: true });
     }
 
-    const emailHtml = `
-      <h2>New Plumbing Service Request</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
-      <p><strong>Email:</strong> ${email || "Not provided"}</p>
-      <p><strong>Service:</strong> ${service}</p>
-      <br />
-      <p><strong>Message:</strong></p>
-      <p>${message}</p>
-    `;
+    const toEmail = process.env.CONTACT_EMAIL || "owner@example.com";
 
-    const toEmail = process.env.CONTACT_EMAIL || "info@ganeshplumbing.com";
+    // HTML Email Template
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1e40af;">New Service Request</h2>
+        <p>A new lead has been submitted via the website contact form.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; width: 120px;">Name</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Phone</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              <a href="tel:${phone}">${phone}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Email</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              ${email ? `<a href="mailto:${email}">${email}</a>` : "Not provided"}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Service</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${service}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;" colspan="2">Message</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; background-color: #f8fafc; border-radius: 4px;" colspan="2">
+              ${message.replace(/\n/g, "<br>")}
+            </td>
+          </tr>
+        </table>
+        
+        <div style="margin-top: 30px; font-size: 12px; color: #64748b;">
+          This message was sent from your website's contact form.
+        </div>
+      </div>
+    `;
 
     const { error: resendError } = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
@@ -139,14 +177,15 @@ export async function POST(req: Request) {
     });
 
     if (resendError) {
-      console.error("Resend error:", resendError);
+      console.error("Failed to send email via Resend:", resendError);
       return NextResponse.json(
-        { error: "Failed to send email.", details: resendError },
+        { error: "Failed to send email notification.", detail: resendError },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, savedToDb: true, emailSent: true });
+
   } catch (error: unknown) {
     console.error("API Contact Error:", error);
     return NextResponse.json(
