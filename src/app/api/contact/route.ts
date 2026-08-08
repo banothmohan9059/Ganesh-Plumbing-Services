@@ -78,11 +78,11 @@ export async function POST(req: Request) {
     const validatedResult = contactSchema.safeParse(data);
 
     if (!validatedResult.success) {
-      const errorMessage = validatedResult.error.errors
-        .map((err) => err.message)
-        .join(", ");
       return NextResponse.json(
-        { error: errorMessage },
+        { 
+          error: "Validation failed.", 
+          details: validatedResult.error.format() 
+        }, 
         { status: 400 }
       );
     }
