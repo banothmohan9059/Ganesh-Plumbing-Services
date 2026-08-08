@@ -18,7 +18,7 @@ try {
         if (parsedJSON.private_key) {
            privateKey = parsedJSON.private_key;
         }
-      } catch (e) {
+      } catch {
         // Not JSON, continue treating as raw string
       }
 
@@ -53,9 +53,9 @@ try {
     authInstance = getAuth();
     dbInstance = getFirestore();
   }
-} catch (error: any) {
+} catch (error: unknown) {
   console.error("Firebase admin initialization error", error);
-  adminInitError = error.message || String(error);
+  adminInitError = error instanceof Error ? error.message : String(error);
 }
 
 export const adminAuth = authInstance;
