@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cloudinary } from "@/lib/cloudinary";
 import { z } from "zod";
-import { adminAuth } from "@/lib/firebase/admin";
+import { initFirebaseAdmin } from "@/lib/firebase/admin";
 
 const getMediaSchema = z.object({
   folder: z.string().regex(/^[a-zA-Z0-9-_/]+$/, "Invalid folder name").default("ganesh-plumbing"),
@@ -19,6 +19,8 @@ export async function GET(request: Request) {
     }
     
     const token = authHeader.split("Bearer ")[1];
+    const { adminAuth } = await initFirebaseAdmin();
+
     if (!adminAuth) {
       console.warn("adminAuth is not initialized");
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -61,6 +63,8 @@ export async function DELETE(request: Request) {
     }
     
     const token = authHeader.split("Bearer ")[1];
+    const { adminAuth } = await initFirebaseAdmin();
+    
     if (!adminAuth) {
       console.warn("adminAuth is not initialized");
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

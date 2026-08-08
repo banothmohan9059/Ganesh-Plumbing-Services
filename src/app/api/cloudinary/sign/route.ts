@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cloudinary } from "@/lib/cloudinary";
 import { z } from "zod";
-import { adminAuth } from "@/lib/firebase/admin";
+import { initFirebaseAdmin } from "@/lib/firebase/admin";
 
 const signSchema = z.object({
   paramsToSign: z.record(z.string(), z.any()),
@@ -15,6 +15,9 @@ export async function POST(request: Request) {
     }
     
     const token = authHeader.split("Bearer ")[1];
+    
+    const { adminAuth } = await initFirebaseAdmin();
+
     if (!adminAuth) {
       console.warn("adminAuth is not initialized");
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

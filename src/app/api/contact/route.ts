@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminDb, adminError } from "@/lib/firebase/admin";
+import { initFirebaseAdmin } from "@/lib/firebase/admin";
 import { z } from "zod";
 
 // ----------------------------------------------------------------------
@@ -88,6 +88,8 @@ export async function POST(req: Request) {
 
     // 4. Save Lead to Firebase Firestore
     try {
+      const { adminDb, adminError } = await initFirebaseAdmin();
+      
       if (!adminDb) {
         console.error("Firebase admin is not initialized. Error:", adminError);
         return NextResponse.json(
