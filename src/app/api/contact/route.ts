@@ -86,26 +86,35 @@ export async function POST(req: Request) {
 
     // 4. Save Lead to Firebase Firestore
     try {
-      if (adminDb) {
-        await adminDb.collection("leads").add({
-          name,
-          phone,
-          email: email || null,
-          service,
-          message,
-          status: "new",
-          createdAt: FieldValue.serverTimestamp(),
-        });
+      if (!adminDb) {
+        console.error("Firebase admin is not initialized. Cannot save lead.");
+        return NextResponse.json(
+          { error: "Database not configured properly." },
+          { status: 500 }
+        );
       }
+      
+      await adminDb.collection("leads").add({
+        name,
+        phone,
+        email: email || null,
+        service,
+        message,
+        status: "new",
+        createdAt: FieldValue.serverTimestamp(),
+      });
     } catch (firebaseError) {
       console.error("Firebase insertion error:", firebaseError);
-      // We don't fail the request if firebase fails, just log it, so user still gets an email.
+      return NextResponse.json(
+        { error: "Failed to save lead to database." },
+        { status: 500 }
+      );
     }
 
-    // 2. Send Email via Resend
+    // 5. Send Email via Resend (Optional)
     if (!process.env.RESEND_API_KEY) {
-      console.warn("RESEND_API_KEY is not set. Simulating email success.");
-      return NextResponse.json({ success: true, simulated: true });
+      // Return true since it successfully saved to Firebase, even if no email is sent.
+      return NextResponse.json({ success: true, savedToDb: true });
     }
 
     const emailHtml = `
@@ -121,13 +130,21 @@ export async function POST(req: Request) {
 
     const toEmail = process.env.CONTACT_EMAIL || "info@ganeshplumbing.com";
 
-    await resend.emails.send({
+    const { error: resendError } = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
       to: [toEmail],
       subject: `New Service Request: ${service} from ${name}`,
       html: emailHtml,
       replyTo: email || undefined,
     });
+
+    if (resendError) {
+      console.error("Resend error:", resendError);
+      return NextResponse.json(
+        { error: "Failed to send email.", details: resendError },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
