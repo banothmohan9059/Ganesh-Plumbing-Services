@@ -14,8 +14,8 @@ export const SITE_CONFIG: SiteConfig = {
   description:
     "Ganesh Plumbing Services provides expert residential and commercial plumbing solutions in Miyapur, Hyderabad. Available 24/7 for emergency repairs, installations, and maintenance.",
   url: "https://ganeshplumbingservices.com",
-  phone: "+916309665446",
-  whatsapp: "+916309665446",
+  phone: "+918121709507",
+  whatsapp: "+918121709507",
   email: "ganibanoth419@gmail.com",
   address: {
     street: "218/2, near Ambedkar Circle, near Janapriya Apartments, Ambedkar Nagar, Hafeezpet",
@@ -44,8 +44,10 @@ export const NAV_LINKS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "Areas", href: "/areas" },
   { label: "Gallery", href: "/gallery" },
-  { label: "FAQ", href: "/faq" },
+  { label: "Reviews", href: "/reviews" },
+  { label: "FAQs", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];
 

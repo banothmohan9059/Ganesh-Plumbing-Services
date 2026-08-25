@@ -188,9 +188,14 @@ export function Footer() {
       <div className="border-t border-white/10">
         <Container size="xl">
           <div className="flex flex-col items-center justify-between gap-3 py-6 sm:flex-row">
-            <p className="text-xs text-white/30">
-              © {currentYear} {SITE_CONFIG.name}. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center gap-1 sm:items-start">
+              <p className="text-xs text-white/30">
+                © {currentYear} {SITE_CONFIG.name}. All rights reserved.
+              </p>
+              <p className="text-xs text-white/30">
+                Developed by banothmohan9059@gmail.com
+              </p>
+            </div>
             <nav aria-label="Legal links">
               <ul className="flex items-center gap-5">
                 {LEGAL_LINKS.map((link) => (

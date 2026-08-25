@@ -112,6 +112,9 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     
+    // Open window immediately during the user gesture to avoid popup blockers
+    const waWindow = window.open("about:blank", "_blank");
+    
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -122,11 +125,24 @@ export function ContactForm() {
       });
 
       if (!response.ok) {
+        if (waWindow) waWindow.close();
         throw new Error("Failed to send message");
       }
 
       setSubmittedData(data);
       setIsSuccess(true);
+      
+      // Navigate the opened window to WhatsApp
+      const text = `Hello Ganesh Plumbing Services!%0A%0A*New Contact Form Request*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone}%0A*Service Required:* ${data.service}%0A%0A*Message:*%0A${data.message}`;
+      const waNumber = SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "");
+      const whatsappUrl = `https://wa.me/${waNumber}?text=${text}`;
+      
+      if (waWindow) {
+        waWindow.location.href = whatsappUrl;
+      } else {
+        // Fallback if the popup was blocked entirely
+        window.location.href = whatsappUrl;
+      }
       
       confetti({
         particleCount: 100,
