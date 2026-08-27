@@ -75,7 +75,7 @@ export default async function RootLayout({
         <JsonLd data={generateLocalBusinessSchema()} />
         <JsonLd data={generateOrganizationSchema()} />
       </head>
-      <body className="min-h-full flex flex-col antialiased">
+      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
