@@ -4,11 +4,12 @@
 
 import type { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
-import { TARGET_LOCATIONS } from "@/lib/location-data";
+import { getLocations } from "@/lib/data/locations";
 import { ALL_SERVICES } from "@/lib/services-page-data";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_CONFIG.url;
+  const locations = await getLocations();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -61,7 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const locationRoutes: MetadataRoute.Sitemap = TARGET_LOCATIONS.map((location) => ({
+  const locationRoutes: MetadataRoute.Sitemap = locations.map((location) => ({
     url: `${baseUrl}/locations/${location.id}`,
     lastModified: new Date(),
     changeFrequency: "monthly",

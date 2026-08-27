@@ -59,11 +59,15 @@ export const viewport: Viewport = {
 // Root Layout
 // ------------------------------------------------------------
 
-export default function RootLayout({
+import { getLocations } from "@/lib/data/locations";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locations = await getLocations();
+
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full`} suppressHydrationWarning>
       <head>
@@ -100,7 +104,7 @@ export default function RootLayout({
 
         {/* Global Toaster */}
         <Toaster richColors position="bottom-right" />
-        <CommandMenu />
+        <CommandMenu locations={locations.map(l => ({ id: l.id, name: l.name }))} />
         </ThemeProvider>
       </body>
     </html>

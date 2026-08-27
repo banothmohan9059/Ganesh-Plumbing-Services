@@ -5,7 +5,6 @@ import { SectionHeading } from "@/components/shared/SectionHeading";
 import { MotionDiv } from "@/components/shared/MotionDiv";
 import { MapPin, Phone, MessageCircle } from "lucide-react";
 import {
-  AREAS_SERVED,
   SITE_CONFIG,
   getPhoneUrl,
   getWhatsAppUrl,
@@ -19,7 +18,10 @@ export const metadata = createMetadata({
   path: "/areas",
 });
 
-export default function AreasPage() {
+import { getLocations } from "@/lib/data/locations";
+
+export default async function AreasPage() {
+  const locations = await getLocations();
   return (
     <>
       {/* 1. Page Hero */}
@@ -42,17 +44,17 @@ export default function AreasPage() {
         </MotionDiv>
         
         <MotionDiv preset="stagger" as="div" className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {AREAS_SERVED.map((area) => (
-            <MotionDiv key={area} preset="stagger-item">
+          {locations.map((loc) => (
+            <MotionDiv key={loc.id} preset="stagger-item">
               <Link
-                href="/contact"
+                href={`/locations/${loc.id}`}
                 className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card p-6 text-center shadow-sm transition-all duration-300 hover:border-brand-200 hover:bg-brand-50/50 hover:shadow-md"
               >
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600 transition-transform duration-500 group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-white">
                   <MapPin className="size-5" aria-hidden="true" />
                 </div>
                 <span className="font-semibold text-foreground group-hover:text-brand-700">
-                  {area}
+                  {loc.name}
                 </span>
               </Link>
             </MotionDiv>

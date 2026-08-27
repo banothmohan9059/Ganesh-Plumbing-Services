@@ -26,7 +26,6 @@ import {
   getPhoneUrl,
   getWhatsAppUrl,
   DEFAULT_WHATSAPP_MESSAGE,
-  AREAS_SERVED,
 } from "@/lib/constants";
 import Link from "next/link";
 import { GalleryItem } from "@/types";
@@ -39,7 +38,11 @@ export const metadata = createMetadata({
 
 export const revalidate = 60;
 
+import { getLocations } from "@/lib/data/locations";
+
 export default async function GalleryPage() {
+  const locations = await getLocations();
+  const areas = locations.map(l => l.name);
   let galleryItems: GalleryItem[] = [];
   try {
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -131,7 +134,7 @@ export default async function GalleryPage() {
         </MotionDiv>
         <MotionDiv preset="stagger" as="div">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-3">
-            {AREAS_SERVED.map((area) => (
+            {areas.map((area) => (
               <MotionDiv key={area} preset="stagger-item">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${

@@ -28,7 +28,6 @@ import {
   getPhoneUrl,
   getWhatsAppUrl,
   DEFAULT_WHATSAPP_MESSAGE,
-  AREAS_SERVED,
 } from "@/lib/constants";
 import Script from "next/script";
 
@@ -110,7 +109,12 @@ const PROCESS_STEPS = [
   },
 ] as const;
 
-export default function ContactPage() {
+import { getLocations } from "@/lib/data/locations";
+
+export default async function ContactPage() {
+  const locations = await getLocations();
+  const areas = locations.map(l => l.name);
+  
   const fullAddress = `${SITE_CONFIG.address.street}, ${SITE_CONFIG.address.city}, ${SITE_CONFIG.address.state} ${SITE_CONFIG.address.pincode}`;
 
   return (
@@ -442,7 +446,7 @@ export default function ContactPage() {
         </MotionDiv>
         <MotionDiv preset="stagger" as="div">
           <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-3">
-            {AREAS_SERVED.map((area) => (
+            {areas.map((area) => (
               <MotionDiv key={area} preset="stagger-item">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${

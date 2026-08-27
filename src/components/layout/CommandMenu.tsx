@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { Search, Wrench, MapPin } from "lucide-react";
 import { ALL_SERVICES } from "@/lib/services-page-data";
-import { TARGET_LOCATIONS } from "@/lib/location-data";
 
-export function CommandMenu() {
+interface LocationOption {
+  id: string;
+  name: string;
+}
+
+export function CommandMenu({ locations = [] }: { locations?: LocationOption[] }) {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
 
@@ -64,21 +68,25 @@ export function CommandMenu() {
             ))}
           </Command.Group>
           
-          <div className="h-px bg-border my-1 mx-2" />
-          
-          <Command.Group heading="Locations" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-            {TARGET_LOCATIONS.map((location) => (
-              <Command.Item
-                key={location.id}
-                value={location.name}
-                onSelect={() => runCommand(() => router.push(`/locations/${location.id}`))}
-                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 mt-1 cursor-pointer"
-              >
-                <MapPin className="mr-2 size-4 text-brand-500" />
-                {location.name}
-              </Command.Item>
-            ))}
-          </Command.Group>
+          {locations.length > 0 && (
+            <>
+              <div className="h-px bg-border my-1 mx-2" />
+              
+              <Command.Group heading="Locations" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+                {locations.map((location) => (
+                  <Command.Item
+                    key={location.id}
+                    value={location.name}
+                    onSelect={() => runCommand(() => router.push(`/locations/${location.id}`))}
+                    className="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 mt-1 cursor-pointer"
+                  >
+                    <MapPin className="mr-2 size-4 text-brand-500" />
+                    {location.name}
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            </>
+          )}
         </Command.List>
       </Command>
     </div>

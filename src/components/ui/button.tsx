@@ -50,6 +50,7 @@ function Button({
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   if (render && React.isValidElement(render)) {
     return React.cloneElement(render, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       className: cn(buttonVariants({ variant, size, className }), (render.props as any).className),
       "data-slot": "button",
       ...props

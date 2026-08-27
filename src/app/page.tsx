@@ -20,11 +20,14 @@ const ContactCTA = nextDynamic(() => import("@/components/sections/ContactCTA").
 const TestimonialsSection = nextDynamic(() => import("@/components/sections/TestimonialsSection").then((mod) => mod.TestimonialsSection), { ssr: true });
 const FAQPreview = nextDynamic(() => import("@/components/sections/FAQPreview").then((mod) => mod.FAQPreview), { ssr: true });
 
+import { getLocations } from "@/lib/data/locations";
+
 export const revalidate = 60; // 1 minute ISR
 
 export default async function HomePage() {
   let featuredServices: Service[] = [];
   let testimonials: Review[] = [];
+  const locations = await getLocations();
 
   try {
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -74,7 +77,7 @@ export default async function HomePage() {
       <FeaturedServices services={featuredServices} />
       <EmergencySection />
       <HowWeWork />
-      <AreasWeServe />
+      <AreasWeServe areas={locations.map(l => l.name)} />
       <TestimonialsSection reviews={testimonials} />
       <FAQPreview />
       <ContactCTA />

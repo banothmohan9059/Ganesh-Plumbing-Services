@@ -8,9 +8,12 @@ import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { MotionDiv } from "@/components/shared/MotionDiv";
 import { CTA } from "@/components/shared/CTA";
-import { AREAS_SERVED } from "@/lib/constants";
 
-export function AreasWeServe() {
+interface AreasWeServeProps {
+  areas: string[];
+}
+
+export function AreasWeServe({ areas }: AreasWeServeProps) {
   return (
     <Section variant="default" spacing="md" containerSize="xl" className="bg-muted/30">
       <MotionDiv preset="slide-up">
@@ -25,7 +28,7 @@ export function AreasWeServe() {
 
       <MotionDiv preset="stagger" as="div">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-3">
-          {AREAS_SERVED.map((area) => (
+          {areas.map((area) => (
             <MotionDiv key={area} preset="stagger-item">
               <span
                 className={`inline-flex items-center rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${

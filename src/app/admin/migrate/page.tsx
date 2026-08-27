@@ -6,7 +6,6 @@ import { collection, doc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ALL_SERVICES } from "@/lib/services-page-data";
-import { TARGET_LOCATIONS } from "@/lib/location-data";
 
 export default function MigrateDataPage() {
   const [loading, setLoading] = useState(false);
@@ -27,11 +26,7 @@ export default function MigrateDataPage() {
         });
       }
 
-      // 2. Migrate Locations
-      setProgress("Migrating Locations...");
-      for (const loc of TARGET_LOCATIONS) {
-        await setDoc(doc(collection(db, "locations"), loc.id), loc);
-      }
+      // Locations migration removed as it is now fully dynamic.
 
       // Optional: Add basic testimonials/gallery logic here if needed
 

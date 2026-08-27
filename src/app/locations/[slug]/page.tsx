@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { TARGET_LOCATIONS } from "@/lib/location-data";
+import { getLocations } from "@/lib/data/locations";
 import { PageHero } from "@/components/shared/PageHero";
 import { Section } from "@/components/layout/Section";
 import { MotionDiv } from "@/components/shared/MotionDiv";
@@ -14,7 +14,8 @@ interface LocationPageProps {
 
 export async function generateMetadata({ params }: LocationPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const location = TARGET_LOCATIONS.find((l) => l.id === resolvedParams.slug);
+  const locations = await getLocations();
+  const location = locations.find((l) => l.id === resolvedParams.slug);
 
   if (!location) {
     return { title: "Location Not Found" };
@@ -30,15 +31,17 @@ export async function generateMetadata({ params }: LocationPageProps): Promise<M
   };
 }
 
-export function generateStaticParams() {
-  return TARGET_LOCATIONS.map((location) => ({
+export async function generateStaticParams() {
+  const locations = await getLocations();
+  return locations.map((location) => ({
     slug: location.id,
   }));
 }
 
 export default async function LocationPage({ params }: LocationPageProps) {
   const resolvedParams = await params;
-  const location = TARGET_LOCATIONS.find((l) => l.id === resolvedParams.slug);
+  const locations = await getLocations();
+  const location = locations.find((l) => l.id === resolvedParams.slug);
 
   if (!location) {
     notFound();

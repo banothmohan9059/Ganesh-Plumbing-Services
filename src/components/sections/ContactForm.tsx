@@ -141,7 +141,7 @@ export function ContactForm() {
         waWindow.location.href = whatsappUrl;
       } else {
         // Fallback if the popup was blocked entirely
-        window.location.href = whatsappUrl;
+        window.location.assign(whatsappUrl);
       }
       
       confetti({
