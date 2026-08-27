@@ -70,12 +70,11 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full`} suppressHydrationWarning>
-      <head>
+      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         {/* Structured Data */}
         <JsonLd data={generateLocalBusinessSchema()} />
         <JsonLd data={generateOrganizationSchema()} />
-      </head>
-      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
+        
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
