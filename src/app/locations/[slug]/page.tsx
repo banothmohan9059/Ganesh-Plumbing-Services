@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Phone, MessageCircle, Wrench, Shield, Clock } from "lucide-react";
 import { getWhatsAppUrl, getPhoneUrl, SITE_CONFIG } from "@/lib/constants";
 import { Metadata } from "next";
+import { createMetadata } from "@/lib/metadata";
 
 interface LocationPageProps {
   params: Promise<{ slug: string }>;
@@ -21,14 +22,11 @@ export async function generateMetadata({ params }: LocationPageProps): Promise<M
     return { title: "Location Not Found" };
   }
 
-  return {
+  return createMetadata({
     title: `Emergency Plumber in ${location.name} | Best Plumbing Near Me`,
     description: `Need a reliable plumber in ${location.name}? Ganesh Plumbing Services offers 24/7 emergency plumbing near you, leak detection, and installations in ${location.name}, Hyderabad.`,
-    openGraph: {
-      title: `Emergency Plumber in ${location.name} | Top-Rated Plumbing Near Me`,
-      description: `Fast and affordable 24/7 emergency plumbing services in ${location.name}, Hyderabad.`,
-    },
-  };
+    path: `/locations/${resolvedParams.slug}`,
+  });
 }
 
 export async function generateStaticParams() {

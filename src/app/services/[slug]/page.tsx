@@ -9,6 +9,7 @@ import * as Icons from "lucide-react";
 import { getWhatsAppUrl, getPhoneUrl, SITE_CONFIG } from "@/lib/constants";
 import { JsonLd, generateServiceSchema } from "@/lib/structured-data";
 import { Metadata } from "next";
+import { createMetadata } from "@/lib/metadata";
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -49,14 +50,11 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
     return { title: "Service Not Found" };
   }
 
-  return {
+  return createMetadata({
     title: `Top-Rated ${service.title} in Hyderabad | Best Near Me`,
     description: `Need expert ${service.title.toLowerCase()}? ${SITE_CONFIG.name} provides fast, affordable, and professional ${service.title.toLowerCase()} in Hyderabad. Call us today!`,
-    openGraph: {
-      title: `Expert ${service.title} Services in Hyderabad`,
-      description: `Need expert ${service.title.toLowerCase()}? ${SITE_CONFIG.name} provides fast, affordable, and professional ${service.title.toLowerCase()} in Hyderabad. Call us today!`,
-    },
-  };
+    path: `/services/${resolvedParams.slug}`,
+  });
 }
 
 export const revalidate = 60;
